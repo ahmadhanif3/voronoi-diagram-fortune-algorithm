@@ -2,31 +2,7 @@ import sys
 from PyQt5.QtWidgets import (QApplication, QMainWindow, QWidget, QVBoxLayout, QHBoxLayout, QLabel,
                              QPushButton, QFrame, QFileDialog)
 from PyQt5.QtCore import Qt, QPoint
-from PyQt5.QtGui import QPainter, QPen, QColor, QMouseEvent
-
-class VoronoiCanvas(QWidget):
-    def __init__(self):
-        super().__init__()
-        self.points = []
-        self.setObjectName("VoronoiCanvas")
-        self.setStyleSheet("""
-            #VoronoiCanvas {
-                background-color: #ffffff;  
-                border: 5px solid #000000; 
-            }
-        """)
-        self.setMaximumSize(1400, 1100)
-
-    def mousePressEvent(self, event):
-        self.points.append(event.pos())
-        self.update()
-
-    def paintEvent(self, event):
-        painter = QPainter(self)
-        pen = QPen(QColor(0, 0, 0), 10, Qt.SolidLine, Qt.RoundCap)
-        painter.setPen(pen)
-        for point in self.points:
-            painter.drawPoint(point.x(), point.y())
+from voronoi import VoronoiCanvas
 
 class MainWindow(QMainWindow):
     def __init__(self):
@@ -62,12 +38,15 @@ class MainWindow(QMainWindow):
         inputLayout = QVBoxLayout()
         self.inputLabel = QLabel("Enter seed point coordinates or load from a file:")
         self.loadButton = QPushButton("Load Points from File")
-        self.loadButton.clicked.connect(self.loadPoints)
+        self.loadButton.clicked.connect(self.canvas.loadPoints)
+        self.computeButton = QPushButton("Compute Voronoi Diagram")
+        # self.computeButton.clicked.connect(self.canvas.computeVoronoi)
         self.infoXLabel = QLabel("X axis maximum coordinate: 1400")
         self.infoYLabel = QLabel("Y axis maximum coordinate: 1100")
 
         inputLayout.addWidget(self.inputLabel)
         inputLayout.addWidget(self.loadButton)
+        inputLayout.addWidget(self.computeButton)
         inputLayout.addWidget(self.infoXLabel)
         inputLayout.addWidget(self.infoYLabel)
         inputLayout.addStretch()
@@ -82,16 +61,6 @@ class MainWindow(QMainWindow):
         centralFrame.addLayout(mainLayout)
 
         self.setCentralWidget(centralWidget)
-
-    def loadPoints(self):
-        filename, _ = QFileDialog.getOpenFileName(self, "Open Points File", "", "Text Files (*.txt)")
-        if filename:
-            with open(filename, 'r') as file:
-                self.canvas.points.clear()
-                for line in file:
-                    x, y = line.strip().split(',')
-                    self.canvas.points.append(QPoint(int(x), int(y)))
-                self.canvas.update()
 
 if __name__ == '__main__':
     app = QApplication(sys.argv)
