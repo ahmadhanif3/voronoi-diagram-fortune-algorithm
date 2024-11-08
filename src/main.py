@@ -4,12 +4,13 @@ from PyQt5.QtWidgets import (QApplication, QMainWindow, QWidget, QVBoxLayout, QH
 from PyQt5.QtCore import Qt, QPoint
 from PyQt5.QtGui import QPainter, QPen, QColor, QMouseEvent
 
-from fortune import VoronoiDiagram
+from fortune import VoronoiDiagram, Point
 
 class VoronoiCanvas(QWidget):
     def __init__(self):
         super().__init__()
         self.points = []
+        self.edges = []
         self.setObjectName("VoronoiCanvas")
         self.setStyleSheet("""
             #VoronoiCanvas {
@@ -29,6 +30,10 @@ class VoronoiCanvas(QWidget):
         painter.setPen(pen)
         for point in self.points:
             painter.drawPoint(point.x(), point.y())
+    
+    def setEdges(self, edges):
+        self.edges = edges
+        self.update()
 
 class MainWindow(QMainWindow):
     def __init__(self):
@@ -77,6 +82,7 @@ class MainWindow(QMainWindow):
         inputLayout.addWidget(self.clearButton)
         inputLayout.addWidget(self.infoXLabel)
         inputLayout.addWidget(self.infoYLabel)
+        inputLayout.addWidget(self.getVoronoi)
         inputLayout.addStretch()
 
         mainLayout.addLayout(canvasLayout, 4)
@@ -105,9 +111,14 @@ class MainWindow(QMainWindow):
         self.canvas.update()
 
     def generateVoronoi(self):
-        # edges = VoronoiDiagram(self.points)
-        # draw edges in canvas
-        return
+        points = [Point(point.x(), point.y()) for point in self.canvas.points]
+        
+        voronoi = VoronoiDiagram(points)
+        voronoi.process_events()
+        edges = voronoi.get_edges()
+
+        canvas_edges = [(QPoint(edge[0].x, edge[0].y), QPoint(edge[1].x, edge[1].y)) for edge in edges]
+        self.canvas.setEdges(canvas_edges)
 
 if __name__ == '__main__':
     app = QApplication(sys.argv)
