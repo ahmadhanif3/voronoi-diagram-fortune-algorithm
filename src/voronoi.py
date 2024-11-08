@@ -16,16 +16,14 @@ class VoronoiCanvas(QWidget):
         self.setMaximumSize(1400, 1100)
 
     def mousePressEvent(self, event):
-        if event.button() == Qt.LeftButton:  # Ensure the left button is pressed
+        if event.button() == Qt.LeftButton:
             self.addPoint(event.pos())
 
     def addPoint(self, pos):
-        """Adds a point at the specified position."""
         self.points.append(pos)
         self.update()
 
     def loadPoints(self):
-        """Opens a file dialog to select and load points from a text file."""
         filename, _ = QFileDialog.getOpenFileName(self, "Open Points File", "", "Text Files (*.txt)")
         if filename:
             self.points.clear()
