@@ -2,7 +2,7 @@ import sys
 from PyQt5.QtWidgets import (QApplication, QMainWindow, QWidget, QVBoxLayout, QHBoxLayout, QLabel,
                              QPushButton, QFrame, QFileDialog)
 from PyQt5.QtCore import Qt, QPoint
-from voronoi import VoronoiCanvas
+from voronoiCanvas import VoronoiCanvas
 
 class MainWindow(QMainWindow):
     def __init__(self):
@@ -39,13 +39,16 @@ class MainWindow(QMainWindow):
         self.inputLabel = QLabel("Enter seed point coordinates or load from a file:")
         self.loadButton = QPushButton("Load Points from File")
         self.loadButton.clicked.connect(self.canvas.loadPoints)
+        self.clearButton = QPushButton("Clear Points")
+        self.clearButton.clicked.connect(self.canvas.clearPoints)
         self.computeButton = QPushButton("Compute Voronoi Diagram")
-        # self.computeButton.clicked.connect(self.canvas.computeVoronoi)
+        self.computeButton.clicked.connect(self.canvas.computeVoronoi)
         self.infoXLabel = QLabel("X axis maximum coordinate: 1400")
         self.infoYLabel = QLabel("Y axis maximum coordinate: 1100")
 
         inputLayout.addWidget(self.inputLabel)
         inputLayout.addWidget(self.loadButton)
+        inputLayout.addWidget(self.clearButton)
         inputLayout.addWidget(self.computeButton)
         inputLayout.addWidget(self.infoXLabel)
         inputLayout.addWidget(self.infoYLabel)

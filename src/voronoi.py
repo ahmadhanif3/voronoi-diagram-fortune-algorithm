@@ -1,41 +1,25 @@
-from PyQt5.QtWidgets import QWidget, QFileDialog
-from PyQt5.QtCore import Qt, QPoint
-from PyQt5.QtGui import QPainter, QPen, QColor
+import heapq
 
-class VoronoiCanvas(QWidget):
-    def __init__(self):
-        super().__init__()
-        self.points = []
-        self.setObjectName("VoronoiCanvas")
-        self.setStyleSheet("""
-            #VoronoiCanvas {
-                background-color: #ffffff;  
-                border: 5px solid #000000; 
-            }
-        """)
-        self.setMaximumSize(1400, 1100)
+class Point:
+  def __init__(self, x, y):
+    self.x = x
+    self.y = y
 
-    def mousePressEvent(self, event):
-        if event.button() == Qt.LeftButton:
-            self.addPoint(event.pos())
+class SweepQueue:
+  def __init__(self):
+    self.queue = []
 
-    def addPoint(self, pos):
-        self.points.append(pos)
-        self.update()
+  def add(self, i):
+    return
 
-    def loadPoints(self):
-        filename, _ = QFileDialog.getOpenFileName(self, "Open Points File", "", "Text Files (*.txt)")
-        if filename:
-            self.points.clear()
-            with open(filename, 'r') as file:
-                for line in file:
-                    x, y = line.strip().split(',')
-                    self.points.append(QPoint(int(x), int(y)))
-            self.update()
 
-    def paintEvent(self, event):
-        painter = QPainter(self)
-        pen = QPen(QColor(0, 0, 0), 10, Qt.SolidLine, Qt.RoundCap)
-        painter.setPen(pen)
-        for point in self.points:
-            painter.drawPoint(point.x(), point.y())
+class Voronoi:
+  def __init__(self, points):
+    self.points = SweepQueue()
+
+    for point in points:
+      p = Point(point.x(), point.y())
+      self.points.add(p)
+    
+    for point in self.points:
+      print(f"{point.x}, {point.y}")
