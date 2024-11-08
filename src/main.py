@@ -4,6 +4,8 @@ from PyQt5.QtWidgets import (QApplication, QMainWindow, QWidget, QVBoxLayout, QH
 from PyQt5.QtCore import Qt, QPoint
 from PyQt5.QtGui import QPainter, QPen, QColor, QMouseEvent
 
+from fortune import VoronoiDiagram
+
 class VoronoiCanvas(QWidget):
     def __init__(self):
         super().__init__()
@@ -63,11 +65,16 @@ class MainWindow(QMainWindow):
         self.inputLabel = QLabel("Enter seed point coordinates or load from a file:")
         self.loadButton = QPushButton("Load Points from File")
         self.loadButton.clicked.connect(self.loadPoints)
+        self.clearButton = QPushButton("Clear Points")
+        self.clearButton.clicked.connect(self.clearPoints)
         self.infoXLabel = QLabel("X axis maximum coordinate: 1400")
         self.infoYLabel = QLabel("Y axis maximum coordinate: 1100")
+        self.getVoronoi = QPushButton("Generate Voronoi Diagram")
+        self.getVoronoi.clicked.connect(self.generateVoronoi)
 
         inputLayout.addWidget(self.inputLabel)
         inputLayout.addWidget(self.loadButton)
+        inputLayout.addWidget(self.clearButton)
         inputLayout.addWidget(self.infoXLabel)
         inputLayout.addWidget(self.infoYLabel)
         inputLayout.addStretch()
@@ -92,6 +99,15 @@ class MainWindow(QMainWindow):
                     x, y = line.strip().split(',')
                     self.canvas.points.append(QPoint(int(x), int(y)))
                 self.canvas.update()
+
+    def clearPoints(self):
+        self.canvas.points.clear()
+        self.canvas.update()
+
+    def generateVoronoi(self):
+        # edges = VoronoiDiagram(self.points)
+        # draw edges in canvas
+        return
 
 if __name__ == '__main__':
     app = QApplication(sys.argv)
