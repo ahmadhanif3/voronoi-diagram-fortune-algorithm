@@ -51,9 +51,14 @@ class SiteQueue:
       _, _, point = heapq.heappop(self.queue)
       self.point_set.remove((point.x, point.y))  
       return point
+  
+  def peek(self):
+    if self.queue:
+        return self.queue[0][2]
+    return None
 
-  def is_empty(self):
-      return len(self.queue) == 0
+  def not_empty(self):
+      return len(self.queue) != 0
 
 class CircleQueue:
     def __init__(self):
@@ -92,21 +97,60 @@ class CircleQueue:
             del self.entry_finder[event]
         raise KeyError("peek from an empty priority queue")
 
-    def is_empty(self):
-        return not self.queue or all(entry[-1] == self.REMOVED for entry in self.queue)
-
-
+    def not_empty(self):
+        return any(entry[-1] != self.REMOVED for entry in self.queue) if self.queue else False
 
 class Voronoi:
   def __init__(self, points):
     self.sites = SiteQueue()
     self.circles = CircleQueue()
-    self.lines = []
+    self.edges = []
     self.arc = None
+    self.x0 = 0
+    self.y0 = 0
+    self.x1 = 1400
+    self.y1 = 1100
 
     for point in points:
       p = Point(point.x(), point.y())
       self.sites.add(p)
     
-    for point in self.sites:
-      print(f"{point.x}, {point.y}")
+  def process(self):
+    while self.sites.not_empty():
+      if self.circles.not_empty() and (self.circles.peek().x <= self.sites.peek().x):
+        self.circle_iter()
+      else:
+        self.site_iter()
+
+    while self.circles.not_empty():
+      self.circle_iter()
+
+    self.finish_edges()
+  
+  def site_iter():
+    return
+
+  def circle_iter():
+    return
+  
+  def arc_insert():
+    return
+  
+  def circle_event():
+    return
+  
+  def circle():
+    return
+  
+  def intersect():
+    return
+  
+  def intersection():
+    return
+  
+  def finish_edges():
+    return
+  
+  def output():
+    return
+  
