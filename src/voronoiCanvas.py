@@ -1,7 +1,7 @@
 from PyQt5.QtWidgets import QWidget, QFileDialog
 from PyQt5.QtCore import Qt, QPoint
 from PyQt5.QtGui import QPainter, QPen, QColor
-import voronoi as vor
+from voronoiIncremental2 import Voronoi
 
 class VoronoiCanvas(QWidget):
     H = 1100
@@ -9,6 +9,7 @@ class VoronoiCanvas(QWidget):
     def __init__(self):
         super().__init__()
         self.points = []
+        self.edges = []
         self.setObjectName("VoronoiCanvas")
         self.setStyleSheet("""
             #VoronoiCanvas {
@@ -28,6 +29,7 @@ class VoronoiCanvas(QWidget):
 
     def clearPoints(self):
         self.points.clear()
+        self.edges.clear()
         self.update()
 
     def loadPoints(self):
@@ -41,13 +43,37 @@ class VoronoiCanvas(QWidget):
             self.update()
 
     def paintEvent(self, event):
+        """Render the points and Voronoi diagram."""
         painter = QPainter(self)
+
+        # Draw seed points
         pen = QPen(QColor(0, 0, 0), 10, Qt.SolidLine, Qt.RoundCap)
         painter.setPen(pen)
         for point in self.points:
             painter.drawPoint(point.x(), point.y())
 
+        # Draw edges
+        if self.edges:
+            pen = QPen(QColor(255, 0, 0), 2, Qt.SolidLine)
+            painter.setPen(pen)
+            for edge in self.edges:
+                p1, p2 = edge
+                painter.drawLine(
+                    int(p1[0]), int(self.H - p1[1]),  # Flip y-axis for drawing
+                    int(p2[0]), int(self.H - p2[1])
+                )
+
+        painter.end()
+
     def computeVoronoi(self):
-        voronoi = vor.Voronoi(self.points)
-        # TODO
-        # After completing voronoi, print out the edges. Later, implement finding biggest circle
+        """Compute the Voronoi diagram."""
+        if len(self.points) < 2:
+            return  # Not enough points to compute the diagram
+
+        # Convert QPoint objects to tuples
+        point_list = [(p.x(), self.H - p.y()) for p in self.points]
+
+        # Instantiate and compute the Voronoi diagram
+        voronoi = Voronoi(point_list)
+        self.edges = voronoi.compute_diagram()  # Get the edges
+        self.update()
