@@ -11,30 +11,30 @@ class Canvas(QGraphicsScene):
         self.circles = []
         self.setSceneRect(0, 0, 1300, 1000)
 
-    # Add a point
     def addPoint(self, point):
+        """Add a point"""
         self.addEllipse(point.x()-5, point.y()-5, 10, 10, QPen(Qt.black), Qt.black)
         self.points.append((point.x(), point.y()))
 
-    # Draw edges of voronoi 
     def drawEdges(self, edges):
+        """Draw edges of voronoi """
         for edge in edges:
             self.addLine(edge[0], edge[1], edge[2], edge[3], QPen(Qt.red))
 
-    # Clear the canvas
     def clearCanvas(self):
+        """Clear the canvas"""
         self.clear()
         self.points = []
 
-    # Load points from file
     def loadPoints(self, file):
+        """Load points from file"""
         for line in file:
             x, y = line.strip().split(',')
             x, y = float(x), 1100-float(y)
             self.addPoint(QPointF(x, y))
     
-    # Draw largest empty circle
     def addCircle(self):
+        """Draw largest empty circle"""
         if not self.circles:
             return
 
@@ -48,8 +48,8 @@ class Canvas(QGraphicsScene):
             pen
         )
 
-    # Calculate voronoi
     def calculate(self):
+        """Calculate voronoi"""
         if self.points:
             self.clear()
             for x, y in self.points:
