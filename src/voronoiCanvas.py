@@ -86,6 +86,6 @@ class VoronoiCanvas(QWidget):
         point_list = [(p.x(), self.H - p.y()) for p in self.points]
 
         # Instantiate and compute the Voronoi diagram
-        voronoi = Voronoi(point_list)
+        voronoi = Voronoi(point_list, 0, 1400, 0, 1100)
         self.edges = voronoi.compute_diagram()  # Get the edges
         self.update()
