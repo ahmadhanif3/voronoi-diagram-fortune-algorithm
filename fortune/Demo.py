@@ -37,10 +37,8 @@ class MainWindow(QMainWindow):
         self.btnClear.clicked.connect(self.clear)
         main_layout.addWidget(self.btnClear)
 
-        # Mouse event handling
-        self.view.setMouseTracking(False)
+        # self.view.setMouseTracking(False)
         self.view.viewport().installEventFilter(self)
-
 
     def eventFilter(self, source, event):
         if event.type() == event.MouseButtonPress:
@@ -50,7 +48,6 @@ class MainWindow(QMainWindow):
             return True
         return super().eventFilter(source, event)
     
-
     def loadPoints(self):
         filename, _ = QFileDialog.getOpenFileName(self, "Open Points File", "", "Text Files (*.txt)")
         if filename:
@@ -60,11 +57,9 @@ class MainWindow(QMainWindow):
                     x, y = float(x), 1100-float(y)
                     self.addPoint(QPointF(x, y))
 
-
     def addPoint(self, point):
         self.scene.addEllipse(point.x()-5, point.y()-5, 10, 10, QPen(Qt.black), Qt.black)
         self.points.append((point.x(), point.y()))
-
 
     def calculate(self):
         self.scene.clear()
@@ -77,11 +72,9 @@ class MainWindow(QMainWindow):
         circles = temp[1] 
         self.drawEdges(edges)
 
-
     def clear(self):
         self.scene.clear()
         self.points = []
-
 
     def drawEdges(self, edges):
         for edge in edges:
