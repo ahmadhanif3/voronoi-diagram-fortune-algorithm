@@ -2,6 +2,7 @@ from PyQt5.QtWidgets import QApplication, QMainWindow, QPushButton, QVBoxLayout,
 from PyQt5.QtGui import QPainter, QPen
 from PyQt5.QtCore import Qt, QPoint
 from Voronoi import Voronoi
+from VoronoiCanvas import VoronoiCanvas
 
 
 class MainWindow(QMainWindow):
@@ -11,7 +12,7 @@ class MainWindow(QMainWindow):
     def __init__(self):
         super().__init__()
         self.setWindowTitle("Voronoi Diagram with Fortune's Algorithm")
-        self.setGeometry(100, 100, 600, 600)
+        self.showFullScreen()
 
         # State variables
         self.points = []
@@ -24,10 +25,11 @@ class MainWindow(QMainWindow):
         self.setCentralWidget(main_widget)
 
         # Canvas setup
+        self.canvas = VoronoiCanvas()
         self.scene = QGraphicsScene()
         self.view = QGraphicsView(self.scene)
         self.view.setRenderHint(QPainter.Antialiasing)
-        main_layout.addWidget(self.view)
+        main_layout.addWidget(self.canvas)
 
         # Buttons
         self.btnCalculate = QPushButton("Calculate")
@@ -62,7 +64,6 @@ class MainWindow(QMainWindow):
             self.RADIUS * 2, self.RADIUS * 2,
             QPen(Qt.black), Qt.black
         )
-        print(point.x(), point.y())
         self.points.append((point.x(), point.y()))
 
     def onClickCalculate(self):
@@ -74,8 +75,6 @@ class MainWindow(QMainWindow):
             vp.process()
             lines = vp.get_output()
             self.drawLinesOnCanvas(lines)
-            
-            print(lines)
 
     def onClickClear(self):
         """Clear the canvas and reset."""
