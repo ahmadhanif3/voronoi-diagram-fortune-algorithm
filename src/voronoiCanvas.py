@@ -10,6 +10,7 @@ class VoronoiCanvas(QWidget):
         super().__init__()
         self.points = []
         self.edges = []
+        self.circles = []
         self.setObjectName("VoronoiCanvas")
         self.setStyleSheet("""
             #VoronoiCanvas {
@@ -27,9 +28,14 @@ class VoronoiCanvas(QWidget):
         self.points.append(pos)
         self.update()
 
+    def addCircle(self, center, radius):
+        self.circles.append((center, radius))
+        self.update()
+
     def clearPoints(self):
         self.points.clear()
         self.edges.clear()
+        self.circles.clear()
         self.update()
 
     def loadPoints(self):
@@ -62,6 +68,12 @@ class VoronoiCanvas(QWidget):
                     int(p1[0]), int(self.H - p1[1]),  # Flip y-axis for drawing
                     int(p2[0]), int(self.H - p2[1])
                 )
+        
+        # Draw circle (update when voronoi algorithm is done)
+        for center, radius in self.circles:
+            pen = QPen(QColor(21, 171, 31), 2, Qt.SolidLine)
+            painter.setPen(pen)
+            painter.drawEllipse(center, radius, radius)
 
         painter.end()
 
