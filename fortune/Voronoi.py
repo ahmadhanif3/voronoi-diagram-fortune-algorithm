@@ -37,7 +37,7 @@ class Segment:
     def finish(self, end):
         self.end = end
 
-class VoronoiDiagram:
+class Voronoi:
     def __init__(self, points):
         self.output = []  # line segments
         self.circles = [] # store circles
@@ -58,52 +58,52 @@ class VoronoiDiagram:
         # Process site and circle events
         while self.points:
             if self.event and self.event[0].x <= self.points[0][0]:
-                self.process_event()
+                self._process_event()
             else:
-                self.process_point()
+                self._process_point()
         
         # Process remaining circle events
         while self.event:
-            self.process_event()
+            self._process_event()
         
-        self.finish_edges()
+        self._finish_edges()
 
-    def process_point(self):
+    def _process_point(self):
         # Get next site event
         _, p = heapq.heappop(self.points)
-        self.arc_insert(p)
+        self._arc_insert(p)
 
-    def process_event(self):
+    def _process_event(self):
         """Process the next circle event."""
         # Get the next circle event
         e = heapq.heappop(self.event)
 
         if e.valid:
             # Handle the valid circle event
-            self.handle_valid_event(e)
+            self._handle_valid_event(e)
 
-    def handle_valid_event(self, e):
+    def _handle_valid_event(self, e):
         """Handle the logic for a valid circle event."""
         # Start a new edge and add it to the output
-        new_segment = self.start_new_edge(e)
+        new_segment = self._start_new_edge(e)
 
         # Remove the arc associated with the event and update neighbors
         arc = e.a
-        self.remove_arc(arc, new_segment)
+        self._remove_arc(arc, new_segment)
 
         # Finish the edges of the removed arc
-        self.finish_arc_edges(arc, e)
+        self._finish_arc_edges(arc, e)
 
         # Recheck circle events for neighboring arcs
-        self.recheck_neighbors(arc, e)
+        self._recheck_neighbors(arc, e)
 
-    def start_new_edge(self, e):
+    def _start_new_edge(self, e):
         """Start a new edge for the circle event."""
         segment = Segment(e.p)
         self.output.append(segment)
         return segment
 
-    def remove_arc(self, arc, new_segment):
+    def _remove_arc(self, arc, new_segment):
         """Remove the arc associated with the event and update neighbor pointers."""
         if arc.pprev:
             arc.pprev.pnext = arc.pnext
@@ -112,28 +112,28 @@ class VoronoiDiagram:
             arc.pnext.pprev = arc.pprev
             arc.pnext.s0 = new_segment
 
-    def finish_arc_edges(self, arc, e):
+    def _finish_arc_edges(self, arc, e):
         """Finish the edges of the removed arc."""
         if arc.s0:
             arc.s0.finish(e.p)
         if arc.s1:
             arc.s1.finish(e.p)
 
-    def recheck_neighbors(self, arc, e):
+    def _recheck_neighbors(self, arc, e):
         """Recheck circle events for the neighboring arcs."""
         if arc.pprev:
-            self.check_circle_event(arc.pprev, e.x)
+            self._check_circle_event(arc.pprev, e.x)
         if arc.pnext:
-            self.check_circle_event(arc.pnext, e.x)
+            self._check_circle_event(arc.pnext, e.x)
 
-    def arc_insert(self, p):
+    def _arc_insert(self, p):
         if not self.arc:
             self.arc = Arc(p)
             return
 
         i = self.arc
         while i:
-            flag, z = self.intersect(p, i)
+            flag, z = self._intersect(p, i)
             if flag:
                 self._split_arc(i, p, z)
                 return
@@ -143,7 +143,7 @@ class VoronoiDiagram:
 
     def _split_arc(self, arc, p, intersection_point):
         """Split an existing arc at the given point and add the new arc."""
-        flag, zz = self.intersect(p, arc.pnext)
+        flag, zz = self._intersect(p, arc.pnext)
         if arc.pnext and not flag:
             arc.pnext.pprev = Arc(arc.p, arc, arc.pnext)
             arc.pnext = arc.pnext.pprev
@@ -174,9 +174,9 @@ class VoronoiDiagram:
 
     def _check_new_circle_events(self, arc, x):
         """Check for new circle events for the split arcs."""
-        self.check_circle_event(arc, x)
-        self.check_circle_event(arc.pprev, x)
-        self.check_circle_event(arc.pnext, x)
+        self._check_circle_event(arc, x)
+        self._check_circle_event(arc.pprev, x)
+        self._check_circle_event(arc.pnext, x)
 
     def _append_arc_to_end(self, p):
         """Append a new arc to the end of the arc list."""
@@ -193,7 +193,7 @@ class VoronoiDiagram:
         i.s1 = i.pnext.s0 = seg
         self.output.append(seg)
 
-    def check_circle_event(self, i, x0):
+    def _check_circle_event(self, i, x0):
         # Remove previous invalid event
         if i.e and i.e.x != self.x0:
             i.e.valid = False
@@ -202,12 +202,12 @@ class VoronoiDiagram:
         if not i.pprev or not i.pnext:
             return
 
-        flag, x, o = self.circle(i.pprev.p, i.p, i.pnext.p)
+        flag, x, o = self._circle(i.pprev.p, i.p, i.pnext.p)
         if flag and x > self.x0:
             i.e = Event(x, o, i)
             heapq.heappush(self.event, i.e)
 
-    def circle(self, a, b, c):
+    def _circle(self, a, b, c):
         # Check right turn
         if ((b.x - a.x)*(c.y - a.y) - (c.x - a.x)*(b.y - a.y)) > 0:
             return False, None, None
@@ -235,16 +235,16 @@ class VoronoiDiagram:
            
         return True, x, o
         
-    def intersect(self, p, i):
+    def _intersect(self, p, i):
         if not i or i.p.x == p.x:
             return False, None
 
         a = b = 0.0
 
         if i.pprev:
-            a = self.intersection(i.pprev.p, i.p, 1.0*p.x).y
+            a = self._intersection(i.pprev.p, i.p, 1.0*p.x).y
         if i.pnext:
-            b = self.intersection(i.p, i.pnext.p, 1.0*p.x).y
+            b = self._intersection(i.p, i.pnext.p, 1.0*p.x).y
 
         if ((not i.pprev or a <= p.y) and (not i.pnext or p.y <= b)):
             py = p.y
@@ -253,7 +253,7 @@ class VoronoiDiagram:
             return True, res
         return False, None
 
-    def intersection(self, p0, p1, l):
+    def _intersection(self, p0, p1, l):
         """Compute the intersection of two parabolas."""
         if p0.x == p1.x:
             return self._handle_vertical_parabolas(p0, p1, l)
@@ -291,12 +291,12 @@ class VoronoiDiagram:
         """Compute the x-coordinate of the intersection"""
         return (p.x**2 + (p.y - py)**2 - l**2) / (2 * p.x - 2 * l)
 
-    def finish_edges(self):
+    def _finish_edges(self):
         l = self.x1 + (self.x1 - self.x0) + (self.y1 - self.y0)
         i = self.arc
         while i.pnext:
             if i.s1:
-                p = self.intersection(i.p, i.pnext.p, l*2.0)
+                p = self._intersection(i.p, i.pnext.p, l*2.0)
                 i.s1.finish(p)
             i = i.pnext
 
@@ -309,6 +309,6 @@ class VoronoiDiagram:
 
 def generate_voronoi(points):
     """Generate Voronoi diagram for given points"""
-    voronoi = VoronoiDiagram(points)
+    voronoi = Voronoi(points)
     voronoi.process()
     return voronoi.get_output()

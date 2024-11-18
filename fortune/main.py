@@ -1,7 +1,7 @@
 from PyQt5.QtWidgets import QApplication, QMainWindow, QPushButton, QHBoxLayout, QWidget, QGraphicsScene, QGraphicsView, QFileDialog
 from PyQt5.QtGui import QPainter, QPen
 from PyQt5.QtCore import Qt, QPointF
-from Voronoi import VoronoiDiagram
+from Voronoi import Voronoi
 
 
 class MainWindow(QMainWindow):
@@ -70,7 +70,7 @@ class MainWindow(QMainWindow):
         self.scene.clear()
         for x, y in self.points:
             self.scene.addEllipse(x-5, y-5, 10, 10, QPen(Qt.black), Qt.black)
-        voronoi = VoronoiDiagram(self.points)
+        voronoi = Voronoi(self.points)
         voronoi.process()
         temp = voronoi.get_output()
         edges = temp[0]
