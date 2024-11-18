@@ -23,10 +23,14 @@ class Voronoi:
         """Calculate a bounding box with a margin around the points."""
         points_array = np.array(self.points)
         margin = 1
-        xmin = points_array[:, 0].min() - margin
-        xmax = points_array[:, 0].max() + margin
-        ymin = points_array[:, 1].min() - margin
-        ymax = points_array[:, 1].max() + margin
+        # xmin = points_array[:, 0].min() - margin
+        # xmax = points_array[:, 0].max() + margin
+        # ymin = points_array[:, 1].min() - margin
+        # ymax = points_array[:, 1].max() + margin
+        xmin = 0
+        xmax = 1400
+        ymin = 0
+        ymax = 1100
         return xmin, xmax, ymin, ymax
 
     def _perpendicular_bisector(self, p1, p2):
