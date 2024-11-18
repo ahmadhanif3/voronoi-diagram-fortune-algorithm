@@ -56,7 +56,6 @@ class Voronoi:
 
         if o1 != o2 and o3 != o4:
             return True
-
         return False  # Simplified for clarity
 
     def compute_diagram(self):
@@ -83,6 +82,9 @@ class Voronoi:
             # Calculate the perpendicular bisector
             bisector_start, bisector_end = self._perpendicular_bisector(new_point, closest_point)
 
+            # Add the bisector as a new edge
+            self.edges.append((bisector_start, bisector_end))
+
             # Check intersections with existing edges
             intersected_edges = []
             for edge in self.edges:
@@ -94,10 +96,8 @@ class Voronoi:
                 self.edges.remove(edge)
                 intersection_point = self._find_intersection(bisector_start, bisector_end, edge[0], edge[1])
                 self.edges.append((intersection_point, edge[0]))
-                self.edges.append((intersection_point, edge[1]))
+                self.edges.append((intersection_point, bisector_start))
 
-            # Add the bisector as a new edge
-            self.edges.append((bisector_start, bisector_end))
 
         return self.edges
 
