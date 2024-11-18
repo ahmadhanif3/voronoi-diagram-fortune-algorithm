@@ -8,6 +8,7 @@ class MainWindow(QMainWindow):
     def __init__(self):
         super().__init__()
         self.points = []
+        self.circles = []
         self.showFullScreen()
 
         # Main layout
@@ -28,6 +29,10 @@ class MainWindow(QMainWindow):
         self.btnCalculate = QPushButton("Calculate Voronoi")
         self.btnCalculate.clicked.connect(self.calculate)
         main_layout.addWidget(self.btnCalculate)
+
+        self.btnLargestCircle = QPushButton("Largest Circle")
+        self.btnLargestCircle.clicked.connect(self.largestCircle)
+        main_layout.addWidget(self.btnLargestCircle)
 
         self.btnLoad = QPushButton("Load Points")
         self.btnLoad.clicked.connect(self.loadPoints)
@@ -69,8 +74,22 @@ class MainWindow(QMainWindow):
         voronoi.process()
         temp = voronoi.get_output()
         edges = temp[0]
-        circles = temp[1] 
+        self.circles = temp[1] 
         self.drawEdges(edges)
+
+    def largestCircle(self):
+        if not self.circles:
+            return
+
+        largest_circle = max(self.circles, key=lambda c: c[2])
+        cx, cy, radius = largest_circle
+
+        pen = QPen(Qt.blue)
+        self.scene.addEllipse(
+            cx - radius, cy - radius,
+            2 * radius, 2 * radius,
+            pen
+        )
 
     def clear(self):
         self.scene.clear()
