@@ -1,7 +1,7 @@
 from PyQt5.QtWidgets import QGraphicsScene
 from PyQt5.QtGui import QPen
 from PyQt5.QtCore import Qt, QPointF
-from Voronoi import VoronoiDiagram
+from Voronoi import Voronoi
 
 
 class Canvas(QGraphicsScene):
@@ -54,7 +54,7 @@ class Canvas(QGraphicsScene):
             self.clear()
             for x, y in self.points:
                 self.addEllipse(x-5, y-5, 10, 10, QPen(Qt.black), Qt.black)
-            voronoi = VoronoiDiagram(self.points)
+            voronoi = Voronoi(self.points)
             voronoi.process()
             temp = voronoi.get_output()
             edges = temp[0]
