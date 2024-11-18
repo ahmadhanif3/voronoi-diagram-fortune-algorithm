@@ -7,6 +7,9 @@ class Point:
         self.x = x
         self.y = y
 
+    def __lt__(self, other):
+        return self.x < other.x
+
 class Event:
     def __init__(self, x: float, p: Optional[Point] = None, a=None, valid=True):
         self.x = x
@@ -37,6 +40,7 @@ class Segment:
 class VoronoiDiagram:
     def __init__(self, points):
         self.output = []  # line segments
+        self.circles = [] # store circles
         self.arc = None
         
         # Priority queues for site and circle events
@@ -201,8 +205,11 @@ class VoronoiDiagram:
         # Circle center
         ox = 1.0 * (D*E - B*F) / G
         oy = 1.0 * (A*F - C*E) / G
-        x = ox + math.sqrt((a.x-ox)**2 + (a.y-oy)**2)
+        radius = math.sqrt((a.x - ox) ** 2 + (a.y - oy) ** 2)
+        x = ox + radius
         o = Point(ox, oy)
+
+        self.circles.append((ox, oy, radius))
            
         return True, x, o
         
@@ -263,7 +270,7 @@ class VoronoiDiagram:
         for o in self.output:
             if o.start and o.end:
                 res.append((o.start.x, o.start.y, o.end.x, o.end.y))
-        return res
+        return res, self.circles
 
 def generate_voronoi(points):
     """Generate Voronoi diagram for given points"""
