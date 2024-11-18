@@ -25,7 +25,6 @@ class MainWindow(QMainWindow):
         self.view.setFixedSize(1400, 1100)
         self.view.setMouseTracking(False)
         self.view.viewport().installEventFilter(self)
-        self.canvas.setSceneRect(0, 0, 1300, 1000) 
         layout.addWidget(self.view)
 
         # Setup Buttons
