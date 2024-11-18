@@ -1,6 +1,6 @@
-from PyQt5.QtWidgets import QApplication, QMainWindow, QPushButton, QVBoxLayout, QWidget, QGraphicsScene, QGraphicsView
+from PyQt5.QtWidgets import QApplication, QMainWindow, QPushButton, QVBoxLayout, QWidget, QGraphicsScene, QGraphicsView, QFileDialog
 from PyQt5.QtGui import QPainter, QPen
-from PyQt5.QtCore import Qt, QPointF
+from PyQt5.QtCore import Qt, QPoint
 from Voronoi import Voronoi
 
 
@@ -10,7 +10,7 @@ class MainWindow(QMainWindow):
 
     def __init__(self):
         super().__init__()
-        self.setWindowTitle("Voronoi Diagram")
+        self.setWindowTitle("Voronoi Diagram with Fortune's Algorithm")
         self.setGeometry(100, 100, 600, 600)
 
         # State variables
@@ -38,6 +38,10 @@ class MainWindow(QMainWindow):
         self.btnClear.clicked.connect(self.onClickClear)
         main_layout.addWidget(self.btnClear)
 
+        self.loadButton = QPushButton("Load Points from File")
+        self.loadButton.clicked.connect(self.loadPoints)
+        main_layout.addWidget(self.loadButton)
+
         # Mouse event handling
         self.view.setMouseTracking(True)
         self.view.viewport().installEventFilter(self)
@@ -58,6 +62,7 @@ class MainWindow(QMainWindow):
             self.RADIUS * 2, self.RADIUS * 2,
             QPen(Qt.black), Qt.black
         )
+        print(point.x(), point.y())
         self.points.append((point.x(), point.y()))
 
     def onClickCalculate(self):
@@ -83,6 +88,22 @@ class MainWindow(QMainWindow):
         pen = QPen(Qt.blue)
         for line in lines:
             self.scene.addLine(line[0], line[1], line[2], line[3], pen)
+
+    def loadPoints(self):
+        filename, _ = QFileDialog.getOpenFileName(self, "Open Points File", "", "Text Files (*.txt)")
+        if filename:
+            self.points.clear()
+            with open(filename, 'r') as file:
+                for line in file:
+                    x, y = line.strip().split(',')
+                    x, y = float(x), float(y)
+                    self.scene.addEllipse(
+                        x - self.RADIUS, y - self.RADIUS,
+                        self.RADIUS * 2, self.RADIUS * 2,
+                        QPen(Qt.black), Qt.black
+                    )
+                    self.points.append((x,y))
+            self.update()
 
 
 def main():
