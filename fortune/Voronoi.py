@@ -45,20 +45,14 @@ class VoronoiDiagram:
         self.points = []
         self.event = []
         
-        # Insert points
         for x, y in points:
             p = Point(x, y)
             heapq.heappush(self.points, (p.x, p))
 
-        # Bounding box
         self.x0  = -100
         self.y0 = -100
         self.x1 = 1500
         self.y1 = 1200
-        
-        # Add margins to bounding box
-        dx = (self.x1 - self.x0 + 1) / 5.0
-        dy = (self.y1 - self.y0 + 1) / 5.0
 
     def process(self):
         # Process site and circle events
