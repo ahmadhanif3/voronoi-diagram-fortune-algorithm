@@ -1,4 +1,4 @@
-from PyQt5.QtWidgets import QApplication, QMainWindow, QPushButton, QHBoxLayout, QVBoxLayout, QWidget, QGraphicsScene, QGraphicsView, QFileDialog
+from PyQt5.QtWidgets import QApplication, QMainWindow, QPushButton, QHBoxLayout, QVBoxLayout, QWidget, QGraphicsView, QFileDialog
 from PyQt5.QtGui import QPainter
 from PyQt5.QtCore import Qt
 from Canvas import Canvas
