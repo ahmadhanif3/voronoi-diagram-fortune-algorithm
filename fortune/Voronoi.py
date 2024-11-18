@@ -231,7 +231,8 @@ class Voronoi:
         x = ox + radius
         o = Point(ox, oy)
 
-        self.circles.append((ox, oy, radius))
+        if self._check_circle_empty(ox, oy, radius):
+            self.circles.append((ox, oy, radius)) 
            
         return True, x, o
         
@@ -299,6 +300,14 @@ class Voronoi:
                 p = self._intersection(i.p, i.pnext.p, l*2.0)
                 i.s1.finish(p)
             i = i.pnext
+
+    def _check_circle_empty(self, ox, oy, radius):
+        """Check if the circle is empty (contains no points)."""
+        for _, point in self.points:
+            distance = math.sqrt((point.x - ox) ** 2 + (point.y - oy) ** 2)
+            if distance <= radius:
+                return False
+        return True 
 
     def get_output(self):
         res = []
