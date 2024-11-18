@@ -1,6 +1,6 @@
 import math
 import heapq
-from typing import List, Tuple, Optional
+from typing import Optional
 
 class Point:
     def __init__(self, x: float, y: float):
@@ -55,10 +55,6 @@ class VoronoiDiagram:
         self.y0 = -100
         self.x1 = 1500
         self.y1 = 1200
-        
-        # Add margins to bounding box
-        dx = (self.x1 - self.x0 + 1) / 5.0
-        dy = (self.y1 - self.y0 + 1) / 5.0
 
     def process(self):
         # Process site and circle events
@@ -80,80 +76,117 @@ class VoronoiDiagram:
         self.arc_insert(p)
 
     def process_event(self):
-        # Get next circle event
+        """Process the next circle event."""
+        # Get the next circle event
         e = heapq.heappop(self.event)
-        
+
         if e.valid:
-            # Start new edge
-            s = Segment(e.p)
-            self.output.append(s)
+            # Handle the valid circle event
+            self.handle_valid_event(e)
 
-            # Remove associated arc
-            a = e.a
-            if a.pprev:
-                a.pprev.pnext = a.pnext
-                a.pprev.s1 = s
-            if a.pnext:
-                a.pnext.pprev = a.pprev
-                a.pnext.s0 = s
+    def handle_valid_event(self, e):
+        """Handle the logic for a valid circle event."""
+        # Start a new edge and add it to the output
+        new_segment = self.start_new_edge(e)
 
-            # Finish edges
-            if a.s0: a.s0.finish(e.p)
-            if a.s1: a.s1.finish(e.p)
+        # Remove the arc associated with the event and update neighbors
+        arc = e.a
+        self.remove_arc(arc, new_segment)
 
-            # Recheck circle events
-            if a.pprev: self.check_circle_event(a.pprev, e.x)
-            if a.pnext: self.check_circle_event(a.pnext, e.x)
+        # Finish the edges of the removed arc
+        self.finish_arc_edges(arc, e)
+
+        # Recheck circle events for neighboring arcs
+        self.recheck_neighbors(arc, e)
+
+    def start_new_edge(self, e):
+        """Start a new edge for the circle event."""
+        segment = Segment(e.p)
+        self.output.append(segment)
+        return segment
+
+    def remove_arc(self, arc, new_segment):
+        """Remove the arc associated with the event and update neighbor pointers."""
+        if arc.pprev:
+            arc.pprev.pnext = arc.pnext
+            arc.pprev.s1 = new_segment
+        if arc.pnext:
+            arc.pnext.pprev = arc.pprev
+            arc.pnext.s0 = new_segment
+
+    def finish_arc_edges(self, arc, e):
+        """Finish the edges of the removed arc."""
+        if arc.s0:
+            arc.s0.finish(e.p)
+        if arc.s1:
+            arc.s1.finish(e.p)
+
+    def recheck_neighbors(self, arc, e):
+        """Recheck circle events for the neighboring arcs."""
+        if arc.pprev:
+            self.check_circle_event(arc.pprev, e.x)
+        if arc.pnext:
+            self.check_circle_event(arc.pnext, e.x)
 
     def arc_insert(self, p):
         if not self.arc:
             self.arc = Arc(p)
             return
 
-        # Find arc to split
         i = self.arc
         while i:
             flag, z = self.intersect(p, i)
             if flag:
-                # Split existing arc
-                flag, zz = self.intersect(p, i.pnext)
-                if i.pnext and not flag:
-                    i.pnext.pprev = Arc(i.p, i, i.pnext)
-                    i.pnext = i.pnext.pprev
-                else:
-                    i.pnext = Arc(i.p, i)
-                i.pnext.s1 = i.s1
-
-                # Add new arc
-                i.pnext.pprev = Arc(p, i, i.pnext)
-                i.pnext = i.pnext.pprev
-
-                i = i.pnext
-
-                # Add new half-edges
-                seg = Segment(z)
-                self.output.append(seg)
-                i.pprev.s1 = i.s0 = seg
-
-                seg = Segment(z)
-                self.output.append(seg)
-                i.pnext.s0 = i.s1 = seg
-
-                # Check for new circle events
-                self.check_circle_event(i, p.x)
-                self.check_circle_event(i.pprev, p.x)
-                self.check_circle_event(i.pnext, p.x)
+                self._split_arc(i, p, z)
                 return
-            
             i = i.pnext
 
-        # Append to end of arc list
+        self._append_arc_to_end(p)
+
+    def _split_arc(self, arc, p, intersection_point):
+        """Split an existing arc at the given point and add the new arc."""
+        flag, zz = self.intersect(p, arc.pnext)
+        if arc.pnext and not flag:
+            arc.pnext.pprev = Arc(arc.p, arc, arc.pnext)
+            arc.pnext = arc.pnext.pprev
+        else:
+            arc.pnext = Arc(arc.p, arc)
+        arc.pnext.s1 = arc.s1
+
+        arc.pnext.pprev = Arc(p, arc, arc.pnext)
+        arc.pnext = arc.pnext.pprev
+
+        arc = arc.pnext
+
+        # Add new half-edges
+        self._add_new_segments(arc, intersection_point)
+
+        # Check for new circle events
+        self._check_new_circle_events(arc, p.x)
+
+    def _add_new_segments(self, arc, intersection_point):
+        """Add new segments for the split arcs."""
+        seg1 = Segment(intersection_point)
+        self.output.append(seg1)
+        arc.pprev.s1 = arc.s0 = seg1
+
+        seg2 = Segment(intersection_point)
+        self.output.append(seg2)
+        arc.pnext.s0 = arc.s1 = seg2
+
+    def _check_new_circle_events(self, arc, x):
+        """Check for new circle events for the split arcs."""
+        self.check_circle_event(arc, x)
+        self.check_circle_event(arc.pprev, x)
+        self.check_circle_event(arc.pnext, x)
+
+    def _append_arc_to_end(self, p):
+        """Append a new arc to the end of the arc list."""
         i = self.arc
         while i.pnext:
             i = i.pnext
         i.pnext = Arc(p, i)
-        
-        # Insert new segment
+
         x = self.x0
         y = (i.pnext.p.y + i.p.y) / 2.0
         start = Point(x, y)
@@ -223,29 +256,42 @@ class VoronoiDiagram:
         return False, None
 
     def intersection(self, p0, p1, l):
-        # Compute parabola intersection
-        p = p0
+        """Compute the intersection of two parabolas."""
         if p0.x == p1.x:
-            py = (p0.y + p1.y) / 2.0
-        elif p1.x == l:
-            py = p1.y
-        elif p0.x == l:
-            py = p0.y
-            p = p1
-        else:
-            # Quadratic formula
-            z0 = 2.0 * (p0.x - l)
-            z1 = 2.0 * (p1.x - l)
+            return self._handle_vertical_parabolas(p0, p1, l)
+        if p1.x == l:
+            return Point(p1.x, p1.y)  # p1 lies on the directrix
+        if p0.x == l:
+            return Point(p0.x, p0.y)  # p0 lies on the directrix
 
-            a = 1.0/z0 - 1.0/z1
-            b = -2.0 * (p0.y/z0 - p1.y/z1)
-            c = 1.0 * (p0.y**2 + p0.x**2 - l**2) / z0 - 1.0 * (p1.y**2 + p1.x**2 - l**2) / z1
+        # General case: Use quadratic formula
+        return self._solve_quadratic_intersection(p0, p1, l)
 
-            py = 1.0 * (-b-math.sqrt(b*b - 4*a*c)) / (2*a)
-            
-        px = 1.0 * (p.x**2 + (p.y-py)**2 - l**2) / (2*p.x-2*l)
-        res = Point(px, py)
-        return res
+    def _handle_vertical_parabolas(self, p0, p1, l):
+        """Handle the special case where parabolas are vertically aligned."""
+        py = (p0.y + p1.y) / 2.0
+        px = self._compute_px(p0, py, l)
+        return Point(px, py)
+
+    def _solve_quadratic_intersection(self, p0, p1, l):
+        """Solve the intersection using the quadratic formula"""
+        z0 = 2.0 * (p0.x - l)
+        z1 = 2.0 * (p1.x - l)
+
+        a = 1.0 / z0 - 1.0 / z1
+        b = -2.0 * (p0.y / z0 - p1.y / z1)
+        c = (
+            (p0.y**2 + p0.x**2 - l**2) / z0
+            - (p1.y**2 + p1.x**2 - l**2) / z1
+        )
+
+        py = (-b - math.sqrt(b**2 - 4 * a * c)) / (2 * a)
+        px = self._compute_px(p0, py, l)
+        return Point(px, py)
+
+    def _compute_px(self, p, py, l):
+        """Compute the x-coordinate of the intersection"""
+        return (p.x**2 + (p.y - py)**2 - l**2) / (2 * p.x - 2 * l)
 
     def finish_edges(self):
         l = self.x1 + (self.x1 - self.x0) + (self.y1 - self.y0)
