@@ -3,6 +3,13 @@ import heapq
 from typing import Optional
 
 class Point:
+    """
+    Represents a 2D point in the plane.
+    
+    Attributes:
+        x (float): The x-coordinate of the point.
+        y (float): The y-coordinate of the point.
+    """
     def __init__(self, x: float, y: float):
         self.x = x
         self.y = y
@@ -11,6 +18,15 @@ class Point:
         return self.x < other.x
 
 class Event:
+    """
+    Represents an event in Fortune's algorithm (site or circle).
+
+    Attributes:
+        x (float): The x-coordinate of the event.
+        p (Optional[Point]): The point associated with the event (for site events).
+        a (Optional[Arc]): The arc associated with the event (for circle events).
+        valid (bool): Whether the event is valid.
+    """
     def __init__(self, x: float, p: Optional[Point] = None, a=None, valid=True):
         self.x = x
         self.p = p
@@ -21,6 +37,17 @@ class Event:
         return self.x < other.x
 
 class Arc:
+    """
+    Represents a parabolic arc in the beachline.
+
+    Attributes:
+        p (Point): The focus point of the parabola.
+        pprev (Optional[Arc]): The previous arc in the linked list.
+        pnext (Optional[Arc]): The next arc in the linked list.
+        s0 (Optional[Segment]): The left edge of the arc.
+        s1 (Optional[Segment]): The right edge of the arc.
+        e (Optional[Event]): The circle event associated with the arc.
+    """
     def __init__(self, p, pprev=None, pnext=None):
         self.p = p  # site point
         self.pprev = pprev  # previous arc
@@ -30,6 +57,13 @@ class Arc:
         self.e = None  # circle event
 
 class Segment:
+    """
+    Represents an edge of the Voronoi diagram.
+
+    Attributes:
+        start (Point): The starting point of the segment.
+        end (Optional[Point]): The ending point of the segment.
+    """
     def __init__(self, start):
         self.start = start
         self.end = None
@@ -39,6 +73,7 @@ class Segment:
 
 class Voronoi:
     def __init__(self, points):
+        """Initializes the Voronoi diagram with a set of points."""
         self.output = []  # line segments
         self.circles = [] # store circles
         self.arc = None        
@@ -55,6 +90,7 @@ class Voronoi:
         self.y1 = 1200
 
     def process(self):
+        """Processes all site and circle events to compute the Voronoi diagram."""
         # Process site and circle events
         while self.points:
             if self.event and self.event[0].x <= self.points[0][0]:
@@ -69,6 +105,7 @@ class Voronoi:
         self._finish_edges()
 
     def _process_point(self):
+        """Processes a site event by adding a new arc to the beachline."""
         # Get next site event
         _, p = heapq.heappop(self.points)
         self._arc_insert(p)
@@ -293,6 +330,7 @@ class Voronoi:
         return (p.x**2 + (p.y - py)**2 - l**2) / (2 * p.x - 2 * l)
 
     def _finish_edges(self):
+        """Finishes the edges of a removed arc."""
         l = self.x1 + (self.x1 - self.x0) + (self.y1 - self.y0)
         i = self.arc
         while i.pnext:
@@ -310,14 +348,9 @@ class Voronoi:
         return True 
 
     def get_output(self):
+        """Retrieves the results of the Voronoi diagram computation."""
         res = []
         for o in self.output:
             if o.start and o.end:
                 res.append((o.start.x, o.start.y, o.end.x, o.end.y))
         return res, self.circles
-
-def generate_voronoi(points):
-    """Generate Voronoi diagram for given points"""
-    voronoi = Voronoi(points)
-    voronoi.process()
-    return voronoi.get_output()
