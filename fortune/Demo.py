@@ -37,7 +37,7 @@ class MainWindow(QMainWindow):
         self.btnClear.clicked.connect(self.clear)
         main_layout.addWidget(self.btnClear)
 
-        # self.view.setMouseTracking(False)
+        self.view.setMouseTracking(False)
         self.view.viewport().installEventFilter(self)
 
     def eventFilter(self, source, event):

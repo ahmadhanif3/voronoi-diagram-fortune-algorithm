@@ -47,10 +47,10 @@ class VoronoiDiagram:
             heapq.heappush(self.points, (p.x, p))
 
         # Bounding box
-        self.x0  = 0
-        self.y0 = 0
-        self.x1 = 1300
-        self.y1 = 1000
+        self.x0  = -100
+        self.y0 = -100
+        self.x1 = 1500
+        self.y1 = 1200
         
         # Add margins to bounding box
         dx = (self.x1 - self.x0 + 1) / 5.0
