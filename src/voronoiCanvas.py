@@ -1,4 +1,4 @@
-from PyQt5.QtWidgets import QWidget, QFileDialog
+from PyQt5.QtWidgets import QWidget, QFileDialog, QPushButton, QHBoxLayout, QLabel
 from PyQt5.QtCore import Qt, QPoint
 from PyQt5.QtGui import QPainter, QPen, QColor
 from voronoiIncremental2 import Voronoi
@@ -6,7 +6,7 @@ from voronoiIncremental2 import Voronoi
 class VoronoiCanvas(QWidget):
     H = 1100
 
-    def __init__(self):
+    def __init__(self, parent=None):
         super().__init__()
         self.points = []
         self.edges = []
@@ -24,7 +24,9 @@ class VoronoiCanvas(QWidget):
             self.addPoint(event.pos())
 
     def addPoint(self, pos):
+        print(pos)
         self.points.append(pos)
+        self.computeVoronoi()
         self.update()
 
     def clearPoints(self):

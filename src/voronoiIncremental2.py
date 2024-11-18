@@ -91,6 +91,7 @@ class Voronoi:
         for _ in range(n - 1):
             new_point = self.points.pop()
             cur_points.append(new_point)
+            print(cur_points)
 
             # Find the closest point to the new one
             nbrs = NearestNeighbors(n_neighbors=2).fit(np.array(cur_points))

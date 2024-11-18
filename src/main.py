@@ -13,6 +13,7 @@ class MainWindow(QMainWindow):
         self.setWindowTitle("Voronoi Diagram with Fortune's Algorithm")
         self.showFullScreen()
 
+        #Window Controls
         self.minimizeButton = QPushButton("-")
         self.exitButton = QPushButton("x")
         self.minimizeButton.clicked.connect(self.showMinimized)
@@ -27,14 +28,17 @@ class MainWindow(QMainWindow):
 
         mainLayout = QHBoxLayout()
 
+        #Canvas
         self.canvas = VoronoiCanvas()
         canvasLayout = QVBoxLayout()
         canvasLayout.addWidget(self.canvas)
 
+        #Separator
         separator = QFrame()
         separator.setFrameShape(QFrame.VLine)
         separator.setFrameShadow(QFrame.Sunken)
 
+        #Input Controls
         inputLayout = QVBoxLayout()
         self.inputLabel = QLabel("Enter seed point coordinates or load from a file:")
         self.loadButton = QPushButton("Load Points from File")
