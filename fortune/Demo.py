@@ -1,108 +1,91 @@
-from PyQt5.QtWidgets import QApplication, QMainWindow, QPushButton, QVBoxLayout, QWidget, QGraphicsScene, QGraphicsView, QFileDialog
+from PyQt5.QtWidgets import QApplication, QMainWindow, QPushButton, QHBoxLayout, QWidget, QGraphicsScene, QGraphicsView, QFileDialog
 from PyQt5.QtGui import QPainter, QPen
-from PyQt5.QtCore import Qt, QPoint
-from Voronoi import Voronoi
-from VoronoiCanvas import VoronoiCanvas
+from PyQt5.QtCore import Qt, QPointF
+from Voronoi import VoronoiDiagram
 
 
 class MainWindow(QMainWindow):
-    # radius of drawn points on canvas
-    RADIUS = 3
-
     def __init__(self):
         super().__init__()
-        self.setWindowTitle("Voronoi Diagram with Fortune's Algorithm")
-        self.showFullScreen()
-
-        # State variables
         self.points = []
-        self.LOCK_FLAG = False
+        self.showFullScreen()
 
         # Main layout
         main_widget = QWidget()
-        main_layout = QVBoxLayout()
+        main_layout = QHBoxLayout()
         main_widget.setLayout(main_layout)
         self.setCentralWidget(main_widget)
 
         # Canvas setup
-        self.canvas = VoronoiCanvas()
         self.scene = QGraphicsScene()
         self.view = QGraphicsView(self.scene)
         self.view.setRenderHint(QPainter.Antialiasing)
-        main_layout.addWidget(self.canvas)
+        self.view.setFixedSize(1400, 1100)
+        self.scene.setSceneRect(0, 0, 1300, 1000) 
+        main_layout.addWidget(self.view)
 
         # Buttons
-        self.btnCalculate = QPushButton("Calculate")
-        self.btnCalculate.clicked.connect(self.onClickCalculate)
+        self.btnCalculate = QPushButton("Calculate Voronoi")
+        self.btnCalculate.clicked.connect(self.calculate)
         main_layout.addWidget(self.btnCalculate)
 
-        self.btnClear = QPushButton("Clear")
-        self.btnClear.clicked.connect(self.onClickClear)
+        self.btnLoad = QPushButton("Load Points")
+        self.btnLoad.clicked.connect(self.loadPoints)
+        main_layout.addWidget(self.btnLoad)
+
+        self.btnClear = QPushButton("Clear Canvas")
+        self.btnClear.clicked.connect(self.clear)
         main_layout.addWidget(self.btnClear)
 
-        self.loadButton = QPushButton("Load Points from File")
-        self.loadButton.clicked.connect(self.loadPoints)
-        main_layout.addWidget(self.loadButton)
-
         # Mouse event handling
-        self.view.setMouseTracking(True)
+        self.view.setMouseTracking(False)
         self.view.viewport().installEventFilter(self)
 
+
     def eventFilter(self, source, event):
-        """Handle mouse events on the canvas."""
-        if event.type() == event.MouseButtonDblClick and not self.LOCK_FLAG:
-            if source == self.view.viewport():
-                pos = event.pos()
-                scene_pos = self.view.mapToScene(pos)
-                self.addPoint(scene_pos)
+        if event.type() == event.MouseButtonPress:
+            pos = event.pos()
+            scene_pos = self.view.mapToScene(pos)
+            self.addPoint(scene_pos)
+            return True
         return super().eventFilter(source, event)
-
-    def addPoint(self, point):
-        """Add a point to the canvas."""
-        self.scene.addEllipse(
-            point.x() - self.RADIUS, point.y() - self.RADIUS,
-            self.RADIUS * 2, self.RADIUS * 2,
-            QPen(Qt.black), Qt.black
-        )
-        self.points.append((point.x(), point.y()))
-
-    def onClickCalculate(self):
-        """Calculate and draw the Voronoi diagram."""
-        if not self.LOCK_FLAG:
-            self.LOCK_FLAG = True
-
-            vp = Voronoi(self.points)
-            vp.process()
-            lines = vp.get_output()
-            self.drawLinesOnCanvas(lines)
-
-    def onClickClear(self):
-        """Clear the canvas and reset."""
-        self.LOCK_FLAG = False
-        self.scene.clear()
-        self.points = []
-
-    def drawLinesOnCanvas(self, lines):
-        """Draw Voronoi edges on the canvas."""
-        pen = QPen(Qt.blue)
-        for line in lines:
-            self.scene.addLine(line[0], line[1], line[2], line[3], pen)
+    
 
     def loadPoints(self):
         filename, _ = QFileDialog.getOpenFileName(self, "Open Points File", "", "Text Files (*.txt)")
         if filename:
-            self.points.clear()
             with open(filename, 'r') as file:
                 for line in file:
                     x, y = line.strip().split(',')
-                    x, y = float(x), float(y)
-                    self.scene.addEllipse(
-                        x - self.RADIUS, y - self.RADIUS,
-                        self.RADIUS * 2, self.RADIUS * 2,
-                        QPen(Qt.black), Qt.black
-                    )
-                    self.points.append((x,y))
-            self.update()
+                    x, y = float(x), 1100-float(y)
+                    self.addPoint(QPointF(x, y))
+
+
+    def addPoint(self, point):
+        self.scene.addEllipse(point.x()-5, point.y()-5, 10, 10, QPen(Qt.black), Qt.black)
+        self.points.append((point.x(), point.y()))
+
+
+    def calculate(self):
+        self.scene.clear()
+        for x, y in self.points:
+            self.scene.addEllipse(x-5, y-5, 10, 10, QPen(Qt.black), Qt.black)
+        voronoi = VoronoiDiagram(self.points)
+        voronoi.process()
+        temp = voronoi.get_output()
+        edges = temp[0]
+        circles = temp[1] 
+        self.drawEdges(edges)
+
+
+    def clear(self):
+        self.scene.clear()
+        self.points = []
+
+
+    def drawEdges(self, edges):
+        for edge in edges:
+            self.scene.addLine(edge[0], edge[1], edge[2], edge[3], QPen(Qt.red))
 
 
 def main():

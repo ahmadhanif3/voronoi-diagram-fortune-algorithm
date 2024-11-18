@@ -37,33 +37,24 @@ class Segment:
 class VoronoiDiagram:
     def __init__(self, points):
         self.output = []  # line segments
-        self.arc = None
-        
-        # Priority queues for site and circle events
+        self.arc = None        
         self.points = []
         self.event = []
-        
-        # Bounding box
-        self.x0 = self.x1 = self.y0 = self.y1 = 0
         
         # Insert points
         for x, y in points:
             p = Point(x, y)
             heapq.heappush(self.points, (p.x, p))
-            
-            # Track bounding box
-            self.x0 = min(self.x0, p.x) if self.x0 or p.x < self.x0 else p.x
-            self.x1 = max(self.x1, p.x)
-            self.y0 = min(self.y0, p.y) if self.y0 or p.y < self.y0 else p.y
-            self.y1 = max(self.y1, p.y)
+
+        # Bounding box
+        self.x0  = 0
+        self.y0 = 0
+        self.x1 = 1300
+        self.y1 = 1000
         
         # Add margins to bounding box
         dx = (self.x1 - self.x0 + 1) / 5.0
         dy = (self.y1 - self.y0 + 1) / 5.0
-        self.x0 -= dx
-        self.x1 += dx
-        self.y0 -= dy
-        self.y1 += dy
 
     def process(self):
         # Process site and circle events
