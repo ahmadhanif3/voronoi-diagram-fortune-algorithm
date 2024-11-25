@@ -37,16 +37,22 @@ class Canvas(QGraphicsScene):
         """Draw largest empty circle"""
         if not self.circles:
             return
+        list_largest_circle = []
 
         largest_circle = max(self.circles, key=lambda c: c[2])
-        cx, cy, radius = largest_circle
+        for circle in self.circles:
+            if circle[2] == largest_circle[2]:
+                list_largest_circle.append(circle)
 
-        pen = QPen(Qt.blue)
-        self.addEllipse(
-            cx - radius, cy - radius,
-            2 * radius, 2 * radius,
-            pen
-        )
+        for largest_circle in list_largest_circle:
+            cx, cy, radius = largest_circle
+
+            pen = QPen(Qt.blue)
+            self.addEllipse(
+                cx - radius, cy - radius,
+                2 * radius, 2 * radius,
+                pen
+            )
 
     def calculate(self):
         """Calculate voronoi"""
