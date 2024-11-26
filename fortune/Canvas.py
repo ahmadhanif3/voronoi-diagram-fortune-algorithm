@@ -25,6 +25,7 @@ class Canvas(QGraphicsScene):
         """Clear the canvas"""
         self.clear()
         self.points = []
+        self.circles = []
 
     def loadPoints(self, file):
         """Load points from file"""
