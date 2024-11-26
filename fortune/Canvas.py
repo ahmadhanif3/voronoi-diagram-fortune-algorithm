@@ -54,12 +54,21 @@ class Canvas(QGraphicsScene):
                 pen
             )
 
+    def removeDuplicatesPoints(self):
+        """Remove duplicate points"""
+        temp_points = []
+        for point in self.points:
+            if point not in temp_points:
+                temp_points.append(point)
+        self.points = temp_points
+
     def calculate(self):
         """Calculate voronoi"""
         if self.points:
             self.clear()
             for x, y in self.points:
                 self.addEllipse(x-5, y-5, 10, 10, QPen(Qt.black), Qt.black)
+            self.removeDuplicatesPoints()
             voronoi = Voronoi(self.points)
             voronoi.process()
             temp = voronoi.get_output()
