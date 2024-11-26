@@ -66,9 +66,9 @@ class Canvas(QGraphicsScene):
         """Calculate voronoi"""
         if self.points:
             self.clear()
+            self.removeDuplicatesPoints()
             for x, y in self.points:
                 self.addEllipse(x-5, y-5, 10, 10, QPen(Qt.black), Qt.black)
-            self.removeDuplicatesPoints()
             voronoi = Voronoi(self.points)
             voronoi.process()
             temp = voronoi.get_output()
