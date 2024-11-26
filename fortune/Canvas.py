@@ -56,7 +56,11 @@ class Canvas(QGraphicsScene):
 
     def removeDuplicatesPoints(self):
         """Remove duplicate points"""
-        self.points = list(set(self.points))
+        temp_points = []
+        for point in self.points:
+            if point not in temp_points:
+                temp_points.append(point)
+        self.points = temp_points
 
     def calculate(self):
         """Calculate voronoi"""
