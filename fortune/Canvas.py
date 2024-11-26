@@ -31,7 +31,7 @@ class Canvas(QGraphicsScene):
         """Load points from file"""
         for line in file:
             x, y = line.strip().split(',')
-            x, y = float(x), float(y)
+            x, y = float(x),1000 - float(y)
             self.addPoint(QPointF(x, y))
     
     def addCircle(self):
